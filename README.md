@@ -19,6 +19,8 @@ Prefixes can be used to retrieve macro properties in compiler command parameters
   `lo:` Retrieves the low byte of the label's address.\
   `hi:` Retrieves the high byte of the label's address.
 
+Compiler labels can be defined as `.<label name>`, while code labels as `<label name>:`.
+
 The language is not case-sensitive, so e.g. `MOV R4 R7`, `mov r4 r7` and `mOv R4 R7` will be assembled into the same instruction.\
 It is also important to use only lowercase file names, in order to make it possible to include them in the project.
 

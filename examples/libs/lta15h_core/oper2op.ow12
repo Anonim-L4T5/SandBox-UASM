@@ -1,0 +1,13 @@
+%define FORWARD_INTERNAL_ERRORS
+
+%jump noerr ((val:%paramcnt == 3) || (val:%paramcnt == 4))
+	%error val:err_invalid_parameter_count 3
+.noerr
+
+%jump skip (val:%paramcnt != 4)
+	_i4r4r4r4 %param0 %param1 %param2 %param3
+.skip
+%jump skip (val:%paramcnt != 3)
+	_i4r4r4r4 %param0 %param1 %param2 %param2
+.skip
+

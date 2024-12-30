@@ -1,0 +1,70 @@
+%jump skip def:LTA15H_CORE_INCLUDED
+%define global LTA15H_CORE_INCLUDED
+
+%define global DW R13
+%define global MS R14
+%define global CR R15
+
+%define global DWR DW
+%define global MSR MS
+
+%include "errors.ow12"
+
+%define lib_path val:%path+lta15h_core
+
+%define global nop { %include <val:lib_path/nop.ow12> } $$ nop
+%define global hlt { %include <val:lib_path/hlt.ow12> } $$ hlt
+%define global jmp { %include <val:lib_path/jmp.ow12> } $$ jmp R2<addr_low> R1<cond>
+%define global set { %include <val:lib_path/set.ow12> } $$ set RW<dest> R1R2<val>
+%define global ldi { set }
+%define global st  { %include <val:lib_path/st.ow12> } $$ st R1<src> R2<addr_low>
+%define global ld  { %include <val:lib_path/ld.ow12> } $$ ld RW<dest> R2<addr_low>
+%define global ext { %include <val:lib_path/ext.ow12> } $$ ext R1<id>
+
+$$ oper RW<dest> R1<a> R2<b>
+%define global lt  { %include <val:lib_path/oper.ow12> 0x7 }
+%define global add { %include <val:lib_path/oper.ow12> 0x8 }
+%define global sub { %include <val:lib_path/oper.ow12> 0x9 }
+%define global mul { %include <val:lib_path/oper.ow12> 0xA }
+%define global div { %include <val:lib_path/oper.ow12> 0xB }
+%define global bsh { %include <val:lib_path/oper.ow12> 0xC }
+%define global nor { %include <val:lib_path/oper.ow12> 0xD }
+%define global and { %include <val:lib_path/oper.ow12> 0xE }
+%define global or  { %include <val:lib_path/oper.ow12> 0xF }
+
+$$ oper RW<dest> R1<a> R2[b = a]
+%define global mov { %include <val:lib_path/oper2op.ow12> 0xF }
+%define global not { %include <val:lib_path/oper2op.ow12> 0xD }
+
+.skip
+
+$vvv
+= INSTRUCTION SYNTAX =================================
+OPER{xxxx} REGW{xxxx} ARGS{xxxx xxxx}
+OPER{xxxx} REGW{xxxx} REG1{xxxx} REG2{xxxx}
+
+= REGISTER LAYOUT IN MEMORY ==========================
+R0  R1  R2  R3  R4  R5  R6  R7
+R8  R9  R10 R11 R12 DWR MSR CR
+
+= OPERAION CODES =====================================
+[0000] - NOP
+[0001] - HLT
+[0010] - JMP (REG2 | (DWR << 8)) IF (REG1 != 0)
+[0011] - REGW = ARGS
+[0100] - [MSR][REG2 | (DWR << 8)] = REG1
+[0101] - REGW = [MSR][REG2 | (DWR << 8)]
+[0110] - EXT REG1
+[0111] - REGW = f[DWR](REG1, REG2)
+
+[1000] - REGW = REG1 + REG2   CR = REG1 + REG2 > 0xff
+[1001] - REGW = REG1 - REG2   CR = REG1 < REG2 (signed)
+[1010] - REGW = REG1 * REG2   CR = REG1 * REG2 >> 8
+[1011] - REGW = REG1 / REG2   CR = REG1 % REG2
+[1100] - REGW = REG1 >> REG2  CR = REG1 << REG2
+[1101] - REGW = !(REG1 | REG2)
+[1110] - REGW = REG1 & REG2
+[1111] - REGW = REG1 | REG2
+
+======================================================
+$^^^

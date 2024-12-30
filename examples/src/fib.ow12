@@ -1,0 +1,13 @@
+%include <libs\lta15h_core.ow12lib>
+
+set R1 1
+set R0 0
+set R2 0
+set R3 lo:loop
+set DWR hi:loop
+
+loop:
+add R2 R0 R1
+mov R0 R1
+mov R1 R2
+jmp R3 R3

@@ -1,0 +1,15 @@
+$$  gtr <dest> <reg1> <reg2>
+$$  Checks if reg1 is greater that reg2.
+
+%jump noerr (val:%paramcnt == 3)
+	%error val:err_invalid_parameter_count 3
+.noerr
+
+%jump err ((val:FREE_REG1 == val:%param0) || (val:FREE_REG1 == val:%param1) || (val:FREE_REG1 == val:%param2))
+	%jump noerr
+	.err
+	%error val:err_unexpected_token
+.noerr
+
+sub FREE_REG1 %param2 %param1 $$ A > B    B - A < 0
+mov %param0 CR

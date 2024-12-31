@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 	if (argc < 3) {
 		fputs(
 			"Usage:\n"
-			".exe <src> <dest> [--groups=8] [-w] [-m]\n"
+			".exe <src> <dest> [--groups=8] [-w] [-m] [-f]\n"
 			"src    - Source file\n"
 			"dest   - Destination file\n"
 			"groups - Number of instructions per line\n"
@@ -130,7 +130,8 @@ int main(int argc, char* argv[]) {
 					newFile.macros["%param" + numToStr(i - 2)] = line[i];
 				newFile.macros["%paramcnt"] = numToStr(line.size() - 2);
 				newFile.macros["%path"] = newFile.location.path;
-
+				
+				files.back().line--;
 				files.push_back(newFile);
 			}
 			else if (line[0] == "%file_pop") { // file_pop

@@ -1,0 +1,35 @@
+%jump skip def:UTIL_OW12_INCLUDED
+%define global UTIL_OW12_INCLUDED
+
+%define global DW R13
+%define global MS R14
+%define global CR R15
+
+%define global DWR val:DW
+%define global MSR val:MS
+
+%define global TRUE 1
+%define global FALSE 0
+
+%include "errors.ow12"
+
+%define lib_path val:%path+util_ow12
+
+%define global ljmp { %include <val:lib_path/ljmp.ow12> } $$ ljmp <label> [cond]
+%define global sjmp { %include <val:lib_path/sjmp.ow12> } $$ sjmp <label> [cond]
+
+%define global jeq  { %include <val:lib_path/jeq.ow12> } $$ jeq <label> <reg1> <reg2>
+%define global jneq { %include <val:lib_path/jneq.ow12> } $$ jneq <label> <reg1> <reg2>
+
+%define global eql  { %include <val:lib_path/eql.ow12>  } $$ eql <reg1> <reg2>
+%define global neql { %include <val:lib_path/neql.ow12> } $$ neql <reg1> <reg2>
+%define global gtr  { %include <val:lib_path/gtr.ow12>  } $$ gtr <reg1> <reg2>
+%define global lss  { %include <val:lib_path/lss.ow12>  } $$ lss <reg1> <reg2>
+
+%define global swap { %include <val:lib_path/swap.ow12> } $$ swap <reg1> <reg2>
+
+$$%define global inc  { %include "util\inc.lta15"  } $$ inc <reg>
+$$%define global dec  { %include "util\dec.lta15"  } $$ dec <reg>
+
+$$%define %definst { %define INST { %include 'INST.lta15' } }
+.skip

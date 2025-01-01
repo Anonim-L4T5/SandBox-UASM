@@ -34,7 +34,7 @@ static bool getArgument(int argc, char* argv[], size_t offset_, const string &pr
 			return true;
 		}
 	}
-
+	
 	return false;
 }
 
@@ -87,20 +87,13 @@ int main(int argc, char* argv[]) {
 		files.push_back(mainFile);
 	}
 	
-	
 	prepareScript(script);
-	
 	for (int l = 0; l < script.size(); l++, files.back().line++) {
 		if (script[l].empty()) continue;
 
 		if (script[l].front() == '.') continue; // preprocessor label
 
-		if (script[l].front() != '%') {
-			replaceMacros(script[l], globalMacros, files.back().macros);
-		}
-		else {
-			replaceMacrosProperties(script[l], globalMacros, files.back().macros);
-		}
+		replaceMacros(script[l], globalMacros, files.back().macros);
 		
 		vector<string> line = split(script[l].data(), script[l].data() + script[l].size());
 		if (line.empty()) continue; // some lines may include only empty tokens (e.g.    "  " {} $$ comment   or sth like that)
@@ -130,7 +123,7 @@ int main(int argc, char* argv[]) {
 					newFile.macros["%param" + numToStr(i - 2)] = line[i];
 				newFile.macros["%paramcnt"] = numToStr(line.size() - 2);
 				newFile.macros["%path"] = newFile.location.path;
-				
+
 				files.back().line--;
 				files.push_back(newFile);
 			}
@@ -205,7 +198,8 @@ int main(int argc, char* argv[]) {
 
 		Instruction newInst;
 		result = assembleInstruction(line, newInst);
-		if (result.code != Success) goto end;
+		if (result.code != Success)
+			goto end;
 		code.push_back(newInst);
 
 	}

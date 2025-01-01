@@ -13,13 +13,10 @@ The `\` symbol can be used to connect multiple lines in the script.
 When using a compiler command, an expression can be evaluated by using parentheses `()`.\
 Supported operators include `+`, `-`, `*`, `/`, `**`, `==`, `!=`, `>`, `<`, `>=`, `<=`, `||`, `&&`, `|`, `&`, `^`, and `!`.
 
-Prefixes can be used to retrieve macro properties in compiler command parameters or parts of a label's address:\
-  `val:` Gets the value of the specified macro.\
+Prefixes can be used to get information about macros or retrive parts of a label's address:\
   `def:` Checks if the specified macro is defined.\
   `lo:` Retrieves the low byte of the label's address.\
   `hi:` Retrieves the high byte of the label's address.
-
-Compiler labels can be defined as `.<label name>`, while code labels as `<label name>:`.
 
 The language is not case-sensitive, so e.g. `MOV R4 R7`, `mov r4 r7` and `mOv R4 R7` will be assembled into the same instruction.\
 It is also important to use only lowercase file names, in order to make it possible to include them in the project.
@@ -66,16 +63,16 @@ If the provided tokens do not match the expected format, an appriopriate error i
 Here are some examples:
 
 `_i4r4r4r4 5 R2 R6 R8`\
-	Compiles into `0x5268`
+  Compiles into `0x5268`
 
 `_i5i10 0b10001 0b10110111`\
-	Turns into `0x44B7` (`0b10001 0010110111`)
+  Turns into `0x44B7` (`0b10001 0010110111`)
 
 `_i1n5r3 1 R4`\
-	Gets transformed into `0x104` (`0b1 00000 100`)
+  Gets transformed into `0x104` (`0b1 00000 100`)
 
 `_i1r2 R5 R2`\
-	Returns `UnexpectedToken` error
+  Returns `UnexpectedToken` error
 
 `_i4 0b11111`\
-	Returns `InvalidValue` error
+  Returns `InvalidValue` error

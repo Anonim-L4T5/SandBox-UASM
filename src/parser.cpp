@@ -117,13 +117,13 @@ vector<string> split(const char *begin_, const char *end_, const char *delim_, c
 	}
 }
 
-static size_t replaceAll(std::string &rStr_, const std::string &macro_, const std::string &value_, bool onlySeparateTokens_ = true) {
+static size_t replaceAll(string &rStr_, const string &macro_, const string &value_, bool onlySeparateTokens_ = true) {
 
 	if (macro_.empty()) return 0;
 	size_t replaced = 0;
 
 	size_t startPos = 0;
-	while ((startPos = rStr_.find(macro_, startPos)) != std::string::npos) {
+	while ((startPos = rStr_.find(macro_, startPos)) != string::npos) {
 
 		if (
 			onlySeparateTokens_ == false ||
@@ -139,28 +139,12 @@ static size_t replaceAll(std::string &rStr_, const std::string &macro_, const st
 	return replaced;
 }
 
-size_t replaceMacros(string &rStr_, const MacroMap &macros_, size_t maxIterationNumber_, const string &prefix_, const string &suffix_) {
-
-	size_t i = 0;
-	bool replaced;
-
-	do {
-		replaced = false;
-		for (auto &[name, value] : macros_)
-			replaced = replaceAll(rStr_, prefix_ + name + suffix_, value);
-	} while (replaced && ++i < maxIterationNumber_);
-
-	return i - 1;
-}
-
-void replaceMacrosProperties(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_) {
-	
-	replaceMacros(rStr_, globalMacros_, localMacros_, 256, "val:");
-
+static size_t replaceMacroDefinitionChecks(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_) {
+	size_t count = 0;
 	size_t pos = 0;
 	while (true) {
 		pos = rStr_.find("def:", pos);
-		if (pos == string::npos) return;
+		if (pos == string::npos) break;
 		if (pos != 0 && isPartOfName(rStr_[pos - 1])) continue;
 
 		size_t macroNamePos = pos + (sizeof("def:") - 1);
@@ -169,7 +153,30 @@ void replaceMacrosProperties(string &rStr_, const MacroMap &globalMacros_, const
 
 		const string &isDefinedStr = isMacroDefined(macroName, globalMacros_, localMacros_) ? "true" : "false";
 		rStr_.replace(rStr_.begin() + pos, rStr_.begin() + macroNamePos + macroNameLenght, isDefinedStr);
+		count++;
 	}
+
+	return count;
+}
+
+size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_, size_t maxIterationNumber_) {
+	size_t count;
+	for (count = 0; count < maxIterationNumber_; count++) {
+		size_t replaced = 0;
+		for (auto &[name, value] : localMacros_) {
+			replaced += replaceAll(rStr_, name, value);
+		}
+
+		for (auto &[name, value] : globalMacros_) {
+			if (localMacros_.find(name) != localMacros_.end()) continue;
+			replaced += replaceAll(rStr_, name, value);
+		}
+
+		replaceMacroDefinitionChecks(rStr_, globalMacros_, localMacros_);
+		if (replaced == 0) break;
+	}
+
+	return count;
 }
 
 bool Expression::parse(const char *begin_, const char *end_, const bool allowEquations_) {

@@ -1,8 +1,8 @@
-%include "libs/lta15h_core.ow12lib"
+%include "../libs/lta15h/core.ow12lib"
 
 %define global FREE_REG1 R12
 %define global FREE_REG2 R11
-%include "libs/util.ow12lib"
+%include "..libs/lta15h/util.ow12lib"
 
 %define tmp1 R11
 %define tmp2 R12

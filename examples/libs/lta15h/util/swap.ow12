@@ -1,0 +1,18 @@
+$$  swap <reg1> <reg2>
+$$  Swap the contents of two registers.
+
+%define FORWARD_INTERNAL_ERRORS
+
+%jump noerr (val:%paramcnt == 2)
+	%error val:err_invalid_parameter_count 2
+.noerr
+
+%jump err ((val:FREE_REG1 == val:%param0) || (val:FREE_REG1 == val:%param1))
+	%jump noerr
+	.err
+	%error val:err_unexpected_token
+.noerr
+
+mov FREE_REG1 %param0
+mov %param0 %param1
+mov %param1 FREE_REG1

@@ -69,15 +69,7 @@ void getNextToken(const char *&rTokBeg_, const char *&rTokEnd_, const char *end_
 
 vector<string> split(const char *begin_, const char *end_, const char *delim_ = " \t", const char *range_ = "()[]{}<>", const char *skip_ = "+", const bool removeEmpty_ = true, const char *trimRangeIndictators_ = "{}");
 
-size_t replaceMacros(string &str_, const MacroMap &macros_, size_t maxIterationNumber_ = 256, const string &prefix_ = "", const string &suffix_ = "");
-
-inline  size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_, size_t maxIterationNumber_ = 256, const string &prefix_ = "", const string &suffix_ = "") {
-	return
-		replaceMacros(rStr_, localMacros_, maxIterationNumber_, prefix_, suffix_) +
-		replaceMacros(rStr_, globalMacros_, maxIterationNumber_, prefix_, suffix_);
-}
-
-void replaceMacrosProperties(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_);
+size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_, size_t maxIterationNumber_ = 256);
 
 inline void prepareScript(vector<string> &rScript_) {
 	removeComments(rScript_, "$$", "$vvv", "$^^^");

@@ -1,4 +1,4 @@
-%include <libs\lta15h_core.ow12lib>
+%include "../libs/lta15h/core.ow12lib"
 
 set R5 0x69
 set R8 0x37

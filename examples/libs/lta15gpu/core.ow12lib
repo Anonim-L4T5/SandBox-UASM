@@ -1,0 +1,65 @@
+%jump skip def:LTA15GPU_CORE_INCLUDED
+%define global LTA15GPU_CORE_INCLUDED
+
+%define global DW R14
+%define global CR R15
+
+%include "errors.ow12"
+
+%define lib_path %path+core
+
+%define global nop { %include <lib_path/nop.ow12> } $$ nop
+%define global jmp { %include <lib_path/jmp.ow12> } $$ jmp R1<addr_low> R2<addr_high>
+%define global set { %include <lib_path/set.ow12> } $$ set RW<dest> R1R2<val>
+%define global ld  { %include <lib_path/ld.ow12> } $$ ld RW<dest> R1<addr_low> R2<addr_high>
+%define global ldt { %include <lib_path/ldt.ow12> } $$ ldt RW<dest> R1<addr_low> R2<addr_high>
+%define global st  { %include <lib_path/st.ow12> } $$ st R1<src> R2<addr_low>
+
+%define global hlt { %include <lib_path/hlt.ow12> } $$ hlt
+
+$$ oper RW<dest> R1<a> R2<b>
+%define global add { %include <lib_path/oper.ow12> 0x8 }
+%define global sub { %include <lib_path/oper.ow12> 0x9 }
+%define global mul { %include <lib_path/oper.ow12> 0xA }
+%define global div { %include <lib_path/oper.ow12> 0xB }
+%define global bsh { %include <lib_path/oper.ow12> 0xC }
+%define global nor { %include <lib_path/oper.ow12> 0xD }
+%define global and { %include <lib_path/oper.ow12> 0xE }
+%define global or  { %include <lib_path/oper.ow12> 0xF }
+
+$$ oper RW<dest> R1<a> R2[b = a]
+%define global mov { %include <lib_path/oper2op.ow12> 0xF }
+%define global not { %include <lib_path/oper2op.ow12> 0xD }
+
+.skip
+
+$vvv
+= INSTRUCTION SYNTAX =================================
+OPER{xxxx} REGW{xxxx} ARGS{xxxx xxxx}
+OPER{xxxx} REGW{xxxx} REG1{xxxx} REG2{xxxx}
+
+= REGISTER LAYOUT IN MEMORY ==========================
+R0  R1  R2  R3  R4  R5  R6  R7
+R8  R9  R10 R11 R12 R13 DW  CR
+
+= OPERAION CODES =====================================
+[0000] - NOP
+[0001] - JMP (REG1 | (REG2 << 8)) IF (DW != 0)
+[0010] - REGW = ARGS
+[0011] - REGW = TXT[REG1 | (REG2 << 8)]
+[0100] - REGW = TGT[REG1 | (REG2 << 8)]
+[0101] - TGT[REG1 | (REG2 << 8)] = DW
+[0110] - 
+[0111] - HLT
+
+[1000] - REGW = REG1 + REG2   CR = REG1 + REG2 > 0xff
+[1001] - REGW = REG1 - REG2   CR = REG1 < REG2 (signed)
+[1010] - REGW = REG1 * REG2   CR = REG1 * REG2 >> 8
+[1011] - REGW = REG1 / REG2   CR = REG1 % REG2
+[1100] - REGW = REG1 >> REG2  CR = REG1 << REG2
+[1101] - REGW = !(REG1 | REG2)
+[1110] - REGW = REG1 & REG2
+[1111] - REGW = REG1 | REG2
+
+======================================================
+$^^^

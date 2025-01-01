@@ -150,7 +150,8 @@ int main(int argc, char* argv[]) {
 			}
 			else returnError(UnknownInstruction, line[0]);
 
-			if (result.code != NoError) goto end;
+			if (result.code != NoError)
+				goto end;
 			continue;
 		}
 		

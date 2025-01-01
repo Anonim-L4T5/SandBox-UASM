@@ -143,6 +143,7 @@ static size_t replaceMacroDefinitionChecks(string &rStr_, const MacroMap &global
 	size_t count = 0;
 	size_t pos = 0;
 	while (true) {
+		
 		pos = rStr_.find("def:", pos);
 		if (pos == string::npos) break;
 		if (pos != 0 && isPartOfName(rStr_[pos - 1])) continue;
@@ -162,6 +163,8 @@ static size_t replaceMacroDefinitionChecks(string &rStr_, const MacroMap &global
 size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_, size_t maxIterationNumber_) {
 	size_t count;
 	for (count = 0; count < maxIterationNumber_; count++) {
+		replaceMacroDefinitionChecks(rStr_, globalMacros_, localMacros_);
+		
 		size_t replaced = 0;
 		for (auto &[name, value] : localMacros_) {
 			replaced += replaceAll(rStr_, name, value);
@@ -172,7 +175,6 @@ size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMa
 			replaced += replaceAll(rStr_, name, value);
 		}
 
-		replaceMacroDefinitionChecks(rStr_, globalMacros_, localMacros_);
 		if (replaced == 0) break;
 	}
 

@@ -47,7 +47,7 @@ Compiler commands can be used to control the compilation process and manage diff
 
 `file_push <path> [params...]`\
   Pushes a new file onto the stack for processing. The file's path and optional parameters can be provided. Each file push isolates macros and other settings within its scope.\
-  **However, it's important to remember that manually managing the file stack can lead to many potential errors, and it is strongly recommended to use "include" command instead.**
+  **However, it's important to remember that manually managing the file stack can lead to many potential errors, and it is strongly recommended to use `%include` command instead.**
 
 `file_pop`
   Pops the most recently pushed file off the stack. This command exits the current file and returns to processing the previous file.

@@ -163,10 +163,12 @@ static size_t replaceMacroDefinitionChecks(string &rStr_, const MacroMap &global
 size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_, size_t maxIterationNumber_) {
 	size_t count;
 	for (count = 0; count < maxIterationNumber_; count++) {
-		replaceMacroDefinitionChecks(rStr_, globalMacros_, localMacros_);
 		
+		replaceMacroDefinitionChecks(rStr_, globalMacros_, localMacros_);
+
 		size_t replaced = 0;
 		for (auto &[name, value] : localMacros_) {
+			// We don't call replaceMacroDefinitionChecks after each replacement because macros can't contain def:-s
 			replaced += replaceAll(rStr_, name, value);
 		}
 

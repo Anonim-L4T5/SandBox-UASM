@@ -1,7 +1,0 @@
-%define FORWARD_INTERNAL_ERRORS
-
-%jump noerr (val:%paramcnt == 2)
-	%error val:err_invalid_parameter_count 2
-.noerr
-
-_i4r4i4r4 0x5 %param0 0x0 %param1

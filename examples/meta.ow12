@@ -1,0 +1,118 @@
+%include "libs/lta15h/core.ow12lib"
+
+%define global FREE_REG1 R12
+%define global FREE_REG2 R11
+%include "libs/lta15h/util.ow12lib"
+
+%define tmp1 R11
+%define tmp2 R12
+
+%define i R0
+
+%define ID_AIR   0b0111
+%define ID_SAND  0b1000
+%define ID_WATER 0b0001
+%define ID_ROCK  0b1100
+
+%define DUST_CAN_FALL   0b0001
+%define LIQUID_CAN_FALL 0b0010
+%define NO_GRAVITY      0b0100
+%define IS_NOT_LIQUID   0b1000
+
+%define TILE_ARR_DWR 0x01
+
+%define EXT_UPDATE_DISPLAY 1
+
+set MSR 0
+
+main:
+	
+	set i 255
+	loop:
+		
+		%define thisTile R3
+		set DWR TILE_ARR_DWR
+		ld thisTile i
+		
+		set tmp1 NO_GRAVITY
+		and tmp1 thisTile tmp1		
+		ljmp continue tmp1
+				
+			%define nbr_i R4
+			%define nbrTile R5
+			
+			%define density R6
+			
+			$$ THIS & IS_NOT_LIQUID == 0b0000 --> density=0b10
+			$$ THIS & IS_NOT_LIQUID == 0b1000 --> density=0b01
+			
+			set density 0b10
+			
+			set tmp1 IS_NOT_LIQUID
+			and tmp1 thisTile tmp1
+			
+			set tmp2 3
+			bsh tmp1 tmp1 tmp2
+			bsh density density tmp1
+			
+			set tmp1 16
+			add nbr_i i tmp1
+			set DWR TILE_ARR_DWR
+			ld nbrTile nbr_i
+			and tmp1 nbrTile density			
+			ljmp can_fall tmp1
+			
+			
+			set tmp1 17
+			add nbr_i i tmp1
+			set DWR TILE_ARR_DWR
+			ld nbrTile nbr_i
+			and tmp1 nbrTile density			
+			ljmp can_fall tmp1
+			
+			
+			set tmp1 15
+			add nbr_i i tmp1
+			set DWR TILE_ARR_DWR
+			ld nbrTile nbr_i
+			and tmp1 nbrTile density			
+			ljmp can_fall tmp1
+			
+			
+			set tmp1 IS_NOT_LIQUID
+			and tmp1 thisTile tmp1		
+			ljmp continue tmp1
+			
+			
+			set tmp1 1
+			add nbr_i i tmp1
+			set DWR TILE_ARR_DWR
+			ld nbrTile nbr_i
+			and tmp1 nbrTile density			
+			ljmp can_fall tmp1
+			
+			set tmp1 -1
+			add nbr_i i tmp1
+			set DWR TILE_ARR_DWR
+			ld nbrTile nbr_i
+			and tmp1 nbrTile density			
+			ljmp can_fall tmp1
+			
+			set tmp1 1
+			ljmp continue tmp1 $$ non zero
+			
+			can_fall:
+			set DWR TILE_ARR_DWR
+			st nbrTile i
+			st thisTile nbr_i
+		
+	
+	continue:
+	set tmp1 1
+	sub i i tmp1
+	ljmp loop i
+	
+	set tmp1 EXT_UPDATE_DISPLAY
+	ext tmp1
+	
+ljmp main tmp1

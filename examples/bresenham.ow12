@@ -1,0 +1,107 @@
+%include "libs/lta15h/core.ow12lib"
+
+%define global FREE_REG1 R12
+%include "libs/lta15h/util.ow12lib"
+
+
+%define x1 R0
+%define y1 R1
+%define x2 R2
+%define y2 R3
+%define color R4
+
+$$ -- -- -- -- -- R5 R6 R7 R8 R9 R10 R11 R12 CR
+
+%define tmp1 R12
+%define tmp2 R11
+set tmp2 0xfe
+
+$$ -- -- -- -- -- R5 R6 R7 R8 R9 R10 --- --- CR
+
+%define stepx R6
+%define dx R8
+set stepx 1
+sub dx x2 x1
+
+nor CR CR tmp2
+ljmp abs_dx CR
+	set stepx -1
+	set tmp1 0
+	sub dx tmp1 dx
+abs_dx:
+
+$$ -- -- -- -- -- R5 -- R7 -- R9 R10 --- --- CR
+
+%define stepy R7
+%define dy R9
+set stepy 1
+sub dy y2 y1
+
+nor CR CR tmp2
+ljmp abs_dy CR
+	set stepy -1
+	set tmp1 0
+	sub dy tmp1 dy
+abs_dy:
+
+%define err R10
+mov err dx
+
+$$ -- -- -- -- -- R5 -- -- -- -- --- --- --- CR
+
+sub tmp1 dy dx
+ljmp abs_err CR
+	set tmp1 0
+	sub err tmp1 dy
+abs_err:
+
+set tmp1 2
+div err err tmp1
+
+%undef tmp2
+%define neg_dx R11
+set neg_dx 0
+sub neg_dx neg_dx dx
+
+$$ -- -- -- -- -- R5 -- -- -- -- --- --- --- CR
+
+%define e2 R5
+
+$$ -- -- -- -- -- -- -- -- -- -- --- --- --- CR
+
+line_draw_loop:
+	mov DWR y1
+	st color x1
+	
+	$$ -- -- -- -- -- -- -- -- -- -- --- --- --- CR
+	
+	sub tmp1 x1 x2
+	sub DWR y1 y2 $$ DWR as additional register
+	or CR DWR tmp1
+	
+	div tmp1 CR CR $$ tmp1 = CR!=0
+	set CR 0xfe
+	nor CR tmp1 CR
+	ljmp finished CR
+	
+	mov e2 err
+	
+	sub tmp1 neg_dx e2
+	set tmp1 0xfe
+	nor CR CR tmp1
+	ljmp cond1 CR
+		sub err err dy
+		add x1 x1 stepx
+	cond1:
+	
+	sub tmp1 e2 dy
+	set tmp1 0xfe
+	nor CR CR tmp1
+	ljmp line_draw_loop CR
+	
+	add err err dx
+	add y1 y1 stepy
+	
+ljmp line_draw_loop stepx $$ stepx and stepy can be only 1 or -1
+
+finished:

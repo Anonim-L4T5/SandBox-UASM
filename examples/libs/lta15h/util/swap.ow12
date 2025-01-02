@@ -3,14 +3,14 @@ $$  Swap the contents of two registers.
 
 %define FORWARD_INTERNAL_ERRORS
 
-%jump noerr (val:%paramcnt == 2)
-	%error val:err_invalid_parameter_count 2
+%jump noerr (%paramcnt == 2)
+	%error err_invalid_parameter_count 2
 .noerr
 
-%jump err ((val:FREE_REG1 == val:%param0) || (val:FREE_REG1 == val:%param1))
+%jump err ((FREE_REG1 == %param0) || (FREE_REG1 == %param1))
 	%jump noerr
 	.err
-	%error val:err_unexpected_token
+	%error err_unexpected_token
 .noerr
 
 mov FREE_REG1 %param0

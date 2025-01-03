@@ -10,7 +10,7 @@
 
 %include "errors.ow12"
 
-%define lib_path %path+core
+%define lib_path %path#core
 
 %define global nop { %include <lib_path/nop.ow12> } $$ nop
 %define global hlt { %include <lib_path/hlt.ow12> } $$ hlt

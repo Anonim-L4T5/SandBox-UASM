@@ -9,6 +9,7 @@ Each line starts with an instruction (`_`), a compiler command (`%`), or a macro
 Double quotes or braces can be used to pass tokens containing whitespaces.
  
 The `\` symbol can be used to connect multiple lines in the script.
+Multiple tokens can be connected using the `#` character.
  
 When using a compiler command, an expression can be evaluated by using parentheses `()`.\
 Supported operators include `+`, `-`, `*`, `/`, `**`, `==`, `!=`, `>`, `<`, `>=`, `<=`, `||`, `&&`, `|`, `&`, `^`, and `!`.

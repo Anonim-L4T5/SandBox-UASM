@@ -13,7 +13,7 @@
 
 %include "errors.ow12"
 
-%define lib_path %path+util
+%define lib_path %path#util
 
 %define global ljmp { %include <lib_path/ljmp.ow12> } $$ ljmp <label> [cond]
 %define global sjmp { %include <lib_path/sjmp.ow12> } $$ sjmp <label> [cond]

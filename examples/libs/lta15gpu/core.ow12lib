@@ -6,7 +6,7 @@
 
 %include "errors.ow12"
 
-%define lib_path %path+core
+%define lib_path %path#core
 
 %define global nop { %include <lib_path/nop.ow12> } $$ nop
 %define global jmp { %include <lib_path/jmp.ow12> } $$ jmp R1<addr_low> R2<addr_high>

@@ -67,10 +67,10 @@ Here are some examples:
   Compiles into `0x5268`
 
 `_i5i10 0b10001 0b10110111`\
-  Turns into `0x44B7` (`0b10001 0010110111`)
+  Turns into `0x896E` (`0b10001 0010110111 0`)
 
 `_i1n5r3 1 R4`\
-  Gets transformed into `0x104` (`0b1 00000 100`)
+  Gets transformed into `0x8200` (`0b1 00000 100 0000000`)
 
 `_i1r2 R5 R2`\
   Returns `UnexpectedToken` error

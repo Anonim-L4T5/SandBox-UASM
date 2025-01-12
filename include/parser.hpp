@@ -63,16 +63,16 @@ inline bool isOneOf(const char char_, const char *list_) {
 	return false;
 }
 
-void removeComments(vector<string> &rScript_, const char *singleLineCommentBegin_ = "$$", const char *multilineCommentBegin_ = "$vvv", const char *multilineCommentEnd_ = "$^^^");
+void removeComments(vector<string> &rScript_, const char *singleLineCommentBegin_ = "$$", const char *multilineCommentBegin_ = "$v", const char *multilineCommentEnd_ = "$^");
 
 void getNextToken(const char *&rTokBeg_, const char *&rTokEnd_, const char *end_, const char *delim_ = " \t", const char *range_ = "()[]{}<>");
 
-vector<string> split(const char *begin_, const char *end_, const char *delim_ = " \t", const char *range_ = "()[]{}<>", const char *skip_ = "+", const bool removeEmpty_ = true, const char *trimRangeIndictators_ = "{}");
+vector<string> split(const char *begin_, const char *end_, const char *delim_ = " \t", const char *range_ = "()[]{}<>", const char *skip_ = "#", const bool removeEmpty_ = true, const char *trimRangeIndictators_ = "{}");
 
 size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_, size_t maxIterationNumber_ = 256);
 
 inline void prepareScript(vector<string> &rScript_) {
-	removeComments(rScript_, "$$", "$vvv", "$^^^");
+	removeComments(rScript_, "$$", "$v", "$^");
 	for (string &s : rScript_) {
 		trimWhitespaces(s);
 		for (char &c : s) c = tolower(c);

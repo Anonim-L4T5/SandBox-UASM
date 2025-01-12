@@ -95,8 +95,16 @@ int main(int argc, char* argv[]) {
 
 		replaceMacros(script[l], globalMacros, files.back().macros);
 		
-		vector<string> line = split(script[l].data(), script[l].data() + script[l].size());
+		vector<string> line = split(script[l].data(), script[l].data() + script[l].size(), " \t");
 		if (line.empty()) continue; // some lines may include only empty tokens (e.g.    "  " {} $$ comment   or sth like that)
+
+		for (string &s : line) {
+			if (s.front() == '(' && s.back() == ')') {
+				Expression expr = s;
+				if (expr.valid()) s = expr.toString(); // We simplify the expressions for further processing
+			}
+		}
+
 
 		if (line[0].front() == '%') {
 

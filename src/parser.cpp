@@ -54,6 +54,13 @@ void getNextToken(const char *&rTokBeg_, const char *&rTokEnd_, const char *end_
 		}
 		// "some(string)"[ ]
 
+		// [']character'
+		if (*rTokEnd_ == '\'') {
+			do rTokEnd_++; while (*rTokEnd_ != '\'' && rTokEnd_ != end_);
+			if (rTokEnd_ == end_) return;
+		}
+		// 'character'[ ]
+
 		// hello[<]wor>ld
 		{
 			char beginOfRange = *rTokEnd_;
@@ -97,6 +104,11 @@ vector<string> split(const char *begin_, const char *end_, const char *delim_, c
 			
 		if (tokenEnd - tokenBegin > 1) {
 			if (*tokenBegin == '"' && *(tokenEnd - 1) == '"') { // here we keep the spaces...
+				tokenBegin++;
+				tokenEnd--;
+			}
+
+			if (*tokenBegin == '\'' && *(tokenEnd - 1) == '\'') { // ... here too ...
 				tokenBegin++;
 				tokenEnd--;
 			}
@@ -203,6 +215,12 @@ bool Expression::parse(const char *begin_, const char *end_, const bool allowEqu
 	if (std::equal(begin_, end_, "false")) {
 		type = Expression::Type::Integer;
 		i = 0 ^ negate;
+		return 1;
+	}
+
+	if (size == 3 && *begin_ == '\'' && *end_ == '\'') {
+		type = Expression::Type::Integer;
+		i = negate ? (*(begin_ + 1) == '\0') : *(begin_ + 1); // idk why anyone would need to check this, but ok
 		return 1;
 	}
 

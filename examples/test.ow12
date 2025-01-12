@@ -1,4 +1,0 @@
-%include "libs/lta15h/core.ow12lib"
-%define test "set R0 0"
-test
-hlt

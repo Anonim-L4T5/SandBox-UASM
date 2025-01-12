@@ -29,6 +29,7 @@ struct ProcessedFile {
 	FilePathAndName location;
 	int line = 0;
 	MacroMap macros;
+	fMacroArgMap fmacros;
 };
 
 struct Marker {

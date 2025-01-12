@@ -1,5 +1,7 @@
 #include "parser.hpp"
 
+#include <iostream>
+
 void removeComments(vector<string> &rScript_, const char *singleLineCommentBegin_, const char *multilineCommentBegin_, const char *multilineCommentEnd_) {
 
 	const bool allowMultilineComments = multilineCommentBegin_ != nullptr && multilineCommentEnd_ != nullptr;
@@ -89,6 +91,28 @@ void getNextToken(const char *&rTokBeg_, const char *&rTokEnd_, const char *end_
 	}
 }
 
+vector<string> splitArgs(string argsText) {
+	vector<string> args;
+	size_t argl;
+	do {
+		argl = argsText.find(',');
+		if (argl == string::npos) {
+			args.push_back(argsText);
+		} else {
+			args.push_back(argsText.substr(0, argl));
+			argsText = argsText.substr(argl + 1);
+		}
+	} while (argl != string::npos);
+	return args;
+}
+void replaceAllText(std::string &str, const std::string& from, const std::string& to) {
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length();
+	}
+}
+
 vector<string> split(const char *begin_, const char *end_, const char *delim_, const char *range_, const char *skip_, const bool removeEmpty_, const char *trimRangeIndictators_) {
 	const char *begin = begin_, *last;
 	vector<string> result;
@@ -163,6 +187,7 @@ static size_t replaceMacroDefinitionChecks(string &rStr_, const MacroMap &global
 		size_t macroNamePos = pos + (sizeof("def:") - 1);
 		size_t macroNameLenght = getNameLength(rStr_, macroNamePos);
 		string macroName(rStr_.data() + macroNamePos, macroNameLenght);
+		macroName = macroName.substr(0, macroName.find('(') == string::npos ? macroNameLenght : macroName.find('('));
 
 		const string &isDefinedStr = isMacroDefined(macroName, globalMacros_, localMacros_) ? "true" : "false";
 		rStr_.replace(rStr_.begin() + pos, rStr_.begin() + macroNamePos + macroNameLenght, isDefinedStr);
@@ -172,8 +197,37 @@ static size_t replaceMacroDefinitionChecks(string &rStr_, const MacroMap &global
 	return count;
 }
 
-size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_, size_t maxIterationNumber_) {
+size_t replaceMacro(string& rStr_, const string &macro_, const MacroMap& globalMacros_, const fMacroArgMap& globalFMacros_, const MacroMap& localMacros_, const fMacroArgMap& localFMacros_) {
+	if (macro_.empty()) return 0;
+	size_t replaced = 0;
+
+	size_t startPos = 0;
+	while ((startPos = rStr_.find(macro_, startPos)) != string::npos) {
+		bool not_used;
+		size_t end = startPos + macro_.size();
+		if (rStr_.find('(', startPos) == startPos + macro_.size()) {
+			end = rStr_.find(')', startPos)+1;
+			if (end == string::npos) end = rStr_.size() - 1;
+		}
+		string invocName = rStr_.substr(startPos, end - startPos);
+		string value_;
+		getMacroValue(value_,invocName, globalMacros_, globalFMacros_, localMacros_, localFMacros_, &not_used);
+		if (
+			((startPos == 0 || !isPartOfName(rStr_[startPos - 1])) &&
+				(end == rStr_.size() || !isPartOfName(rStr_[end])))
+			) {
+			rStr_.replace(startPos, end-startPos, value_);
+			replaced++;
+		}
+		startPos += value_.size();
+	}
+
+	return replaced;
+}
+
+size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const fMacroArgMap &globalFMacros_, const MacroMap &localMacros_, const fMacroArgMap &localFMacros_, size_t maxIterationNumber_) {
 	size_t count;
+
 	for (count = 0; count < maxIterationNumber_; count++) {
 		
 		replaceMacroDefinitionChecks(rStr_, globalMacros_, localMacros_);
@@ -181,12 +235,12 @@ size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMa
 		size_t replaced = 0;
 		for (auto &[name, value] : localMacros_) {
 			// We don't call replaceMacroDefinitionChecks after each replacement because macros can't contain def:-s
-			replaced += replaceAll(rStr_, name, value);
+			replaced += replaceMacro(rStr_, name, globalMacros_, globalFMacros_, localMacros_, localFMacros_);
 		}
 
 		for (auto &[name, value] : globalMacros_) {
 			if (localMacros_.find(name) != localMacros_.end()) continue;
-			replaced += replaceAll(rStr_, name, value);
+			replaced += replaceMacro(rStr_, name, globalMacros_, globalFMacros_, localMacros_, localFMacros_);
 		}
 
 		if (replaced == 0) break;

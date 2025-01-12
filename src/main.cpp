@@ -71,6 +71,7 @@ int main(int argc, char* argv[]) {
 	vector<Instruction> code;
 	unordered_map<string, Label> labels;
 	MacroMap globalMacros;
+	fMacroArgMap globalFMacros;
 	vector<Marker> markers;
 	vector<ProcessedFile> files;
 	Result result = {};
@@ -93,7 +94,7 @@ int main(int argc, char* argv[]) {
 
 		if (script[l].front() == '.') continue; // preprocessor label
 
-		replaceMacros(script[l], globalMacros, files.back().macros);
+		replaceMacros(script[l], globalMacros, globalFMacros, files.back().macros, files.back().fmacros);
 		
 		vector<string> line = split(script[l].data(), script[l].data() + script[l].size(), " \t");
 		if (line.empty()) continue; // some lines may include only empty tokens (e.g.    "  " {} $$ comment   or sth like that)
@@ -109,10 +110,10 @@ int main(int argc, char* argv[]) {
 		if (line[0].front() == '%') {
 
 			if (line[0] == "%define") { // define [global] <macro> [value]
-				result = defineMacro(line, globalMacros, files.back().macros);
+				result = defineMacro(line, globalMacros, globalFMacros, files.back().macros, files.back().fmacros);
 			}
 			else if (line[0] == "%undef") { // undef [global] <macro>
-				result = undefMacro(line, globalMacros, files.back().macros);
+				result = undefMacro(line, globalMacros, globalFMacros, files.back().macros, files.back().fmacros);
 			}
 			else if (line[0] == "%include") { // include <file> [params...]
 				result = includeFile(line, script, l, files);

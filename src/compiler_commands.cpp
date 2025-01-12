@@ -1,24 +1,74 @@
 #include "compiler_commands.hpp"
 
-const string &getMacroValue(const string &str_, const MacroMap &rGlobalMacros_, const MacroMap &rLocalMacros_, bool *pDefined_) {
+#include <iostream>
 
-	auto macro = rLocalMacros_.find(str_);
+void getMacroValue(string &out, const string &str_, const MacroMap &rGlobalMacros_, const fMacroArgMap &rGlobalFMacros_, const MacroMap &rLocalMacros_, const fMacroArgMap &rLocalFMacros_, bool *pDefined_) {
+	string macroName = str_;
+	const size_t argBegin = str_.find('(');
+	const size_t argEnd = str_.find(')');
+	do {
+		if (argBegin == string::npos || argEnd == string::npos) break;
+		const auto argTextLen = argEnd - argBegin;
+		if (argTextLen < 0) break;
+		macroName = str_.substr(0, argBegin);
+		const string argText = str_.substr(argBegin + 1, argTextLen - 1);
+		vector<string> argVals = splitArgs(argText);
+		auto fmacro = rLocalFMacros_.find(macroName);
+		if (fmacro != rLocalFMacros_.end()) {
+			auto fcount = argVals.size();
+			auto ecount = fmacro->second.size();
+			if (fcount!=ecount) {
+				std::cout << "incorrect argument count (found " << fcount << ", expected " << ecount << "): ignoring all arguments\n";
+				out = macroName;
+				return;
+			}
+			string mval;
+			getMacroValue(mval,macroName, rGlobalMacros_, rGlobalFMacros_, rLocalMacros_, rLocalFMacros_, pDefined_);
+			for (int i = 0; i < ecount;i++) {
+				replaceAllText(mval, "@" + fmacro->second.at(i), argVals.at(i));
+			}
+			out=mval;
+			return;
+		}
+		fmacro = rGlobalFMacros_.find(macroName);
+		if (fmacro != rGlobalFMacros_.end()) {
+			auto fcount = argVals.size();
+			auto ecount = fmacro->second.size();
+			if (fcount != ecount) {
+				std::cout << "incorrect argument count (found " << fcount << ", expected " << ecount << "): ignoring all arguments\n";
+				out=str_;
+				return;
+			}
+			string mval;
+			getMacroValue(mval,macroName, rGlobalMacros_, rGlobalFMacros_, std::unordered_map<string, string>(), std::unordered_map<string, vector<string>>(), pDefined_);
+			for (int i = 0; i < ecount; i++) {
+				replaceAllText(mval, "$" + fmacro->second.at(i), argVals.at(i));
+			}
+			out=mval;
+			return;
+		}
+	} while (0);
+	
+	auto macro = rLocalMacros_.find(macroName);
 	if (macro != rLocalMacros_.end()) {
 		if (pDefined_ != nullptr) *pDefined_ = true;
-		return macro->second;
+		out=macro->second;
+		return;
 	}
 
-	macro = rGlobalMacros_.find(str_);
+	macro = rGlobalMacros_.find(macroName);
 	if (macro != rGlobalMacros_.end()) {
 		if (pDefined_ != nullptr) *pDefined_ = true;
-		return macro->second;
+		out= macro->second;
+		return;
 	}
 
 	if (pDefined_ != nullptr) *pDefined_ = false;
-	return str_;
+	out=macroName;
+	return;
 }
 
-Result defineMacro(const vector<string> &line_, MacroMap &rGlobalMacros_, MacroMap &rLocalMacros_) {
+Result defineMacro(const vector<string> &line_, MacroMap &rGlobalMacros_, fMacroArgMap &rGlobalFMacros_, MacroMap &rLocalMacros_, fMacroArgMap& rLocalFMacros_) {
 
 	if (line_.size() < 2) return { InvalidParameterCount, "1, 2 or 3" }; // We don't count the command
 
@@ -27,6 +77,30 @@ Result defineMacro(const vector<string> &line_, MacroMap &rGlobalMacros_, MacroM
 		return { InvalidParameterCount, global ? "2 or 3" : "1 or 2" };
 
 	const string &macroName = line_[global ? 2 : 1];
+
+	const size_t argBegin = macroName.find('(');
+	const size_t argEnd = macroName.find(')');
+	do {
+		if (argBegin==string::npos||argEnd==string::npos) break;
+		const auto argTextLen = argEnd-argBegin;
+		if (argTextLen<0) break;
+		const string fmacroName = macroName.substr(0,argBegin);
+		const string argText = macroName.substr(argBegin+1,argTextLen-1);
+		vector<string> argNames = splitArgs(argText);
+
+		string macroValue;
+		if (global)
+			macroValue = (line_.size() == 4 ? line_[3] : "");
+		else
+			macroValue = (line_.size() == 3 ? line_[2] : "");
+
+		if (macroName.front() == '%') return { UnexpectedToken, fmacroName };
+
+		(global ? rGlobalMacros_ : rLocalMacros_)[fmacroName] = macroValue;
+		(global ? rGlobalFMacros_ : rLocalFMacros_)[fmacroName] = argNames;
+		
+		return {};
+	} while(0);
 
 	string macroValue;
 	if (global)
@@ -41,16 +115,18 @@ Result defineMacro(const vector<string> &line_, MacroMap &rGlobalMacros_, MacroM
 	return {};
 }
 
-Result undefMacro(const vector<string> &line_, MacroMap &rGlobalMacros_, MacroMap &rLocalMacros_) {
+Result undefMacro(const vector<string>& line_, MacroMap& rGlobalMacros_, fMacroArgMap& rGlobalFMacros_, MacroMap& rLocalMacros_, fMacroArgMap& rLocalFMacros_) {
 
 	if (line_.size() == 2) {
 		if (line_[1].front() == '%') return { UnexpectedToken, line_[1] };
 		rLocalMacros_.erase(line_[1]);
+		rLocalFMacros_.erase(line_[1]);
 	}
 	else if (line_.size() == 3) {
 		if (line_[1] != "global") return { UnexpectedToken, line_[1] };
 		if (line_[2].front() == '%') return { UnexpectedToken, line_[2] };
 		rGlobalMacros_.erase(line_[2]);
+		rGlobalFMacros_.erase(line_[2]);
 	}
 	else return { InvalidParameterCount, "1 or 2" };
 

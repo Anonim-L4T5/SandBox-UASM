@@ -67,9 +67,13 @@ void removeComments(vector<string> &rScript_, const char *singleLineCommentBegin
 
 void getNextToken(const char *&rTokBeg_, const char *&rTokEnd_, const char *end_, const char *delim_ = " \t", const char *range_ = "()[]{}<>");
 
+vector<string> splitArgs(string argsText);
+
+void replaceAllText(std::string& str, const std::string& from, const std::string& to);
+
 vector<string> split(const char *begin_, const char *end_, const char *delim_ = " \t", const char *range_ = "()[]{}<>", const char *skip_ = "#", const bool removeEmpty_ = true, const char *trimRangeIndictators_ = "{}");
 
-size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const MacroMap &localMacros_, size_t maxIterationNumber_ = 256);
+size_t replaceMacros(string &rStr_, const MacroMap &globalMacros_, const fMacroArgMap &globalFMacros_, const MacroMap &localMacros_, const fMacroArgMap& localFMacros_, size_t maxIterationNumber_ = 256);
 
 inline void prepareScript(vector<string> &rScript_) {
 	removeComments(rScript_, "$$", "$v", "$^");

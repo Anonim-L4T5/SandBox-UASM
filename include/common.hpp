@@ -16,6 +16,7 @@ using std::pair;
 
 using Instruction = uint64_t;
 using MacroMap = unordered_map<string, string>;
+using fMacroArgMap = unordered_map<string, vector<string>>;
 
 constexpr int divceil(int a, int b) { return a / b + (a % b != 0); }
 constexpr int bitmask(int bits_) { return ~(~0U << bits_); }

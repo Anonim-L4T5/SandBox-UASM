@@ -1,0 +1,4 @@
+%include "libs/lta15h/core.ow12lib"
+%define a(r,v) "set R@r @v"
+%define b(v) "a(0,@v)"
+b(5)
